@@ -279,6 +279,35 @@ Current limitations:
 - Tweets are noisy, short, and context-dependent.
 - Sarcasm and political statements are still difficult.
 
+### Out-of-distribution text and the label-taxonomy ceiling
+
+This is the most important limitation to understand. The model was trained on
+short, reactive **tweets** (SemEval-2018). When given longer, reflective text —
+for example a diary-style passage — it tends to predict confidently and
+**incorrectly**, because such text is *out of distribution*: nothing like it
+appears in the training data, so the model pattern-matches on surface features
+rather than genuine emotional meaning.
+
+A real example tested on the demo: a calm, melancholic personal reflection
+(sitting alone on a rainy day, noticing a one-eyed pigeon that didn't fly away)
+was predicted as `disgust` and `anger` — emotions the writer did not feel at
+all. Two separate failures are at work:
+
+1. **Domain shift.** Reflective prose is structurally and stylistically unlike
+   tweets, so the learned patterns do not transfer.
+2. **Label-taxonomy ceiling.** The 11 SemEval emotions cannot represent feelings
+   such as *loneliness, melancholy, tenderness, or compassion*. Even a perfect
+   classifier limited to this taxonomy could not label them correctly — the
+   closest available label (`sadness`) scored just below its threshold here.
+3. **Truncation.** Inputs are cut to 96 tokens, so long passages are only
+   partially read.
+
+The takeaway: a model's reliability is bounded by the **distribution it was
+trained on** and the **label set it was given**. For genuinely open-ended human
+emotion, a model trained on a richer taxonomy (e.g. the 27-label GoEmotions
+dataset) would be a more appropriate starting point than this tweet-specific
+model.
+
 ## Deployment
 
 The best model (BERTweet + threshold tuning) is deployed two ways:
