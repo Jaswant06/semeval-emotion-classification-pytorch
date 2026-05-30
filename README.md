@@ -1,5 +1,10 @@
 # SemEval Emotion Classification With PyTorch
 
+**🤗 Live demo:** [Try the model on Hugging Face Spaces](https://huggingface.co/spaces/JaswantDev/tweet-emotion-classifier)
+&nbsp;|&nbsp; **Model:** [JaswantDev/bertweet-emotion-classification](https://huggingface.co/JaswantDev/bertweet-emotion-classification)
+
+Type any tweet or sentence into the demo and the model predicts which emotions it expresses (multi-label).
+
 ## Project Goal
 
 This project builds a multi-label emotion classification system for tweets.
@@ -211,11 +216,22 @@ Train the transformer model:
 python src/train_transformer.py
 ```
 
-Run transformer predictions:
+Run transformer predictions in the terminal:
 
 ```bash
 python src/predict_transformer.py
 ```
+
+Run the interactive web demo locally (downloads the trained model from the Hugging Face Hub automatically):
+
+```bash
+pip install -r requirements-space.txt
+python app.py
+```
+
+> Note: the trained model weights are not stored in this repo (they are large). The best model is hosted on the Hugging Face Hub at
+> [JaswantDev/bertweet-emotion-classification](https://huggingface.co/JaswantDev/bertweet-emotion-classification) and is loaded automatically by `app.py`.
+> To reproduce the weights locally instead, run the training scripts above.
 
 ## Project Structure
 
@@ -241,10 +257,15 @@ semeval-emotion-classification-pytorch/
 |   +-- train_bilstm.py
 |   +-- train_transformer.py
 |   +-- predict_transformer.py
++-- app.py                     # Gradio web demo (deployed on Hugging Face Spaces)
++-- requirements.txt           # dependencies for training
++-- requirements-space.txt     # dependencies for the web demo
 +-- README.md
-+-- requirements.txt
 +-- .gitignore
 ```
+
+> Trained model weights (`models/`) are gitignored because of their size. See the
+> [How To Run](#how-to-run) note for how the demo loads the model from the Hub.
 
 ## Limitations
 
@@ -258,6 +279,15 @@ Current limitations:
 - Tweets are noisy, short, and context-dependent.
 - Sarcasm and political statements are still difficult.
 
+## Deployment
+
+The best model (BERTweet + threshold tuning) is deployed two ways:
+
+- **Model weights** are hosted on the Hugging Face Hub: [JaswantDev/bertweet-emotion-classification](https://huggingface.co/JaswantDev/bertweet-emotion-classification)
+- **Interactive demo** runs on Hugging Face Spaces (Gradio): [tweet-emotion-classifier](https://huggingface.co/spaces/JaswantDev/tweet-emotion-classifier)
+
+The demo loads the model from the Hub, applies per-label tuned thresholds, and shows both the predicted emotions and the full probability breakdown. See [app.py](app.py).
+
 ## Next Improvements
 
 Possible future upgrades:
@@ -266,8 +296,6 @@ Possible future upgrades:
 - Tune thresholds on a separate validation set
 - Add early stopping
 - Compare BERTweet with RoBERTa and DeBERTa
-- Build a small Streamlit or FastAPI demo
-- Deploy the best model as an API
 - Add a model card with intended use and limitations
 
 ## Final Takeaway
