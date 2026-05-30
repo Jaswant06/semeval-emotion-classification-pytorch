@@ -258,6 +258,7 @@ semeval-emotion-classification-pytorch/
 |   +-- train_transformer.py
 |   +-- predict_transformer.py
 +-- app.py                     # Gradio web demo (deployed on Hugging Face Spaces)
++-- diagnose.py                # calibration stress test (see Limitations)
 +-- requirements.txt           # dependencies for training
 +-- requirements-space.txt     # dependencies for the web demo
 +-- README.md
@@ -307,6 +308,36 @@ trained on** and the **label set it was given**. For genuinely open-ended human
 emotion, a model trained on a richer taxonomy (e.g. the 27-label GoEmotions
 dataset) would be a more appropriate starting point than this tweet-specific
 model.
+
+### Calibration stress test
+
+To check whether the failures above were just "hard inputs" or a deeper problem,
+I stress-tested the model on clearly-positive, clearly-negative, and neutral
+sentences (see [diagnose.py](diagnose.py)). The model is **poorly calibrated on
+plain English**:
+
+- **Over-predicts `sadness` on positive text.** `"I'm so proud of myself today"`
+  → 2% joy, **89% sadness**, predicted *disgust + pessimism + sadness*.
+  `"I am so happy and grateful right now"` → 80% sadness.
+- **The tuned `joy` threshold (0.10) is too low**, so neutral text gets tagged as
+  joy: `"The train arrives every hour"` → predicted *joy*.
+- **Under-predicts on negatives:** `"I feel hopeless and miserable"` → predicted
+  *nothing*.
+
+There are two distinct causes, and separating them matters:
+
+1. **Threshold miscalibration (cheap to fix).** Thresholds were tuned to maximize
+   F1 on the dev set, producing extreme values (e.g. `joy = 0.10`). Resetting them
+   to saner values would remove the neutral-text noise.
+2. **Weak underlying model on non-tweet English (not cheap to fix).** The *raw*
+   sadness probability for "proud of myself" is 89% — no threshold change fixes
+   that. The model genuinely struggles on text unlike its training tweets, which
+   would require retraining or a different base model/dataset.
+
+**Conclusion:** this model is reasonable on short, tweet-like text but should not
+be treated as a general-purpose emotion classifier. Rather than hide that, it is
+documented here, because honestly characterizing where a model breaks is part of
+deploying it responsibly.
 
 ## Deployment
 
