@@ -5,6 +5,8 @@
 
 Type any tweet or sentence into the demo and the model predicts which emotions it expresses (multi-label).
 
+**Best model:** BERTweet with per-label threshold tuning, Micro F1 0.73 across 11 emotions.
+
 ## Project Goal
 
 This project builds a multi-label emotion classification system for tweets.
